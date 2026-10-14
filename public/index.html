@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>CampusConnect — Event Portal</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/vendor/jsQR.js" defer></script>
+  <script src="/app.js" defer></script>
+  <script src="/scanner.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">C</span><span>CampusConnect</span></a>
+    <nav class="nav">
+      <a href="#events">Events</a>
+      <button id="myEventsNav" class="link-button hidden" type="button">My tickets</button>
+      <button id="accountNav" class="link-button hidden" type="button">Account</button>
+      <button id="adminNav" class="link-button hidden" type="button">Admin</button>
+      <span id="userLabel" class="user-label"></span>
+      <button id="logoutBtn" class="button button-small button-ghost hidden" type="button">Log out</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">YOUR CAMPUS. YOUR COMMUNITY.</p>
+        <h1>Make room for<br><span>what's next.</span></h1>
+        <p class="hero-subtitle">Discover campus events, reserve your place, and check in with a secure digital ticket.</p>
+        <a class="button button-primary" href="#events">Explore events <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-top"><span class="live-dot"></span> CAMPUS EVENT PORTAL</div>
+        <div class="hero-icon">✦</div>
+        <h2>One place to connect.</h2>
+        <p>Register online. Keep your QR ticket. Check in at the door.</p>
+        <div class="hero-stats"><div><strong>01</strong><span>Discover</span></div><div><strong>02</strong><span>Register</span></div><div><strong>03</strong><span>Attend</span></div></div>
+      </div>
+    </section>
+
+    <section id="authSection" class="auth-panel">
+      <div class="section-heading">
+        <div><p class="eyebrow">GET STARTED</p><h2>Join your campus community</h2></div>
+        <p>Create a student account or sign in to register for events.</p>
+      </div>
+      <div class="auth-grid">
+        <form id="loginForm" class="panel">
+          <h3>Welcome back</h3><p class="muted">Sign in to your account.</p>
+          <label>Email address<input name="email" type="email" required maxlength="254" autocomplete="email"></label>
+          <label>Password<input name="password" type="password" required autocomplete="current-password"></label>
+          <button class="button button-primary full" type="submit">Sign in</button>
+        </form>
+        <form id="registerForm" class="panel">
+          <h3>Create account</h3><p class="muted">Use your student details to get started.</p>
+          <label>Full name<input name="name" required minlength="2" maxlength="100" autocomplete="name"></label>
+          <label>Email address<input name="email" type="email" required maxlength="254" autocomplete="email"></label>
+          <label>Password<input name="password" type="password" required minlength="10" maxlength="72" autocomplete="new-password"><small>Use at least 10 characters.</small></label>
+          <button class="button button-dark full" type="submit">Create student account</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="events" class="section">
+      <div class="section-heading">
+        <div><p class="eyebrow">WHAT'S HAPPENING</p><h2>Upcoming events</h2></div>
+        <button id="refreshEventsBtn" class="button button-ghost" type="button">Refresh events ↻</button>
+      </div>
+      <div id="eventsList" class="event-grid"><div class="empty-state">Loading events…</div></div>
+    </section>
+
+    <section id="myTicketsSection" class="section hidden">
+      <div class="section-heading"><div><p class="eyebrow">YOUR PLANS</p><h2>My tickets</h2></div></div>
+      <div id="myTicketsList" class="ticket-grid"></div>
+    </section>
+
+    <section id="adminSection" class="section hidden">
+      <div class="section-heading"><div><p class="eyebrow">ORGANIZER TOOLS</p><h2>Event administration</h2></div></div>
+      <div class="admin-grid">
+        <form id="createEventForm" class="panel">
+          <h3>Create an event</h3>
+          <label>Event title<input name="title" required minlength="3" maxlength="150"></label>
+          <label>Description<textarea name="description" required minlength="5" maxlength="3000" rows="3"></textarea></label>
+          <label>Venue<input name="venue" required maxlength="180"></label>
+          <label>Event date and time<input name="startsAt" type="datetime-local" required></label>
+          <label>Registration deadline<input name="deadline" type="datetime-local" required></label>
+          <label>Participant capacity<input name="capacity" type="number" min="1" max="100000" required></label>
+          <button class="button button-primary full" type="submit">Publish event</button>
+        </form>
+        <div class="panel">
+          <h3>Attendance check-in</h3>
+          <p class="muted">Point the camera at a student's QR ticket. Pick the event to refuse tickets that belong to a different one.</p>
+          <label>Event being checked in<select id="checkinEventSelect"><option value="">Any event</option></select></label>
+          <video id="scanVideo" class="scan-video hidden" playsinline muted></video>
+          <button id="scanToggle" class="button button-primary full" type="button">Scan with camera</button>
+          <div id="scanResult" class="scan-result" role="status" aria-live="assertive"></div>
+          <details class="manual">
+            <summary>Enter a ticket token manually</summary>
+            <form id="checkinForm">
+              <label>Ticket token<input name="ticketToken" required maxlength="80" placeholder="Paste the ticket token" autocomplete="off"></label>
+              <button class="button button-dark full" type="submit">Validate ticket &amp; check in</button>
+            </form>
+          </details>
+          <hr>
+          <h3>Registration report</h3>
+          <label>Choose event<select id="reportEventSelect"><option value="">Select an event</option></select></label>
+          <button id="loadReportBtn" class="button button-ghost full" type="button">Load registrations</button>
+          <div id="reportList" class="report-list"></div>
+        </div>
+      </div>
+      <div class="panel users-panel">
+        <h3>User management</h3>
+        <p class="muted">Promote organizers, or deactivate an account to block sign-in immediately. You can't change your own account, and at least one active administrator must remain.</p>
+        <label>Search by name or email<input id="userSearch" type="search" maxlength="100" placeholder="Start typing…" autocomplete="off"></label>
+        <div id="usersList" class="report-list"></div>
+        <button id="usersMore" class="button button-ghost full hidden" type="button">Load more</button>
+      </div>
+    </section>
+
+    <section id="accountSection" class="section hidden">
+      <div class="section-heading"><div><p class="eyebrow">YOUR ACCOUNT</p><h2>Change password</h2></div></div>
+      <form id="passwordForm" class="panel account-panel">
+        <label>Current password<input name="currentPassword" type="password" required autocomplete="current-password"></label>
+        <label>New password<input name="newPassword" type="password" required minlength="10" maxlength="72" autocomplete="new-password"><small>10–72 characters. Other devices are signed out when you change it.</small></label>
+        <button class="button button-primary full" type="submit">Update password</button>
+      </form>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <footer class="footer"><span>CampusConnect</span><span>College Event Registration & Attendance System · CA3 Mini-project</span></footer>
+</body>
+</html>
